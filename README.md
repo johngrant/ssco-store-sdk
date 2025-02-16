@@ -1,4 +1,4 @@
-# SSCO Store SDK
+# Stockton Street Co Store SDK
 
 Welcome to the SSCO Store SDK! This SDK provides tools and libraries to help you integrate with the SSCO Store platform.
 
