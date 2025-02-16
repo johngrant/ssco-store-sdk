@@ -1,6 +1,7 @@
 # Stockton Street Co Store SDK
 
-Welcome to the SSCO Store SDK! This SDK provides tools and libraries to help you integrate with the SSCO Store platform.
+Welcome to the SSCO Store SDK! This SDK provides generalized client apis, webhook handlers, messaging, and services to be used in building integraitons with the Lemon Squeezy platform. 
+# 🍋✊🏻
 
 - **Author**: John Grant
 - **Version**: 1.0.0
