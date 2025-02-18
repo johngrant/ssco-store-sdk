@@ -1,0 +1,10 @@
+FROM postgres:latest
+
+# Set environment variables
+ENV POSTGRES_USER=testuser
+ENV POSTGRES_PASSWORD=testpw
+ENV POSTGRES_DB=ssco-store-testdb
+
+# Copy initialization scripts
+COPY *.sql /docker-entrypoint-initdb.d/
+
