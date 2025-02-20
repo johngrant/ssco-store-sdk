@@ -1,15 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Request, Response } from 'express';
-import { WebhookEvent, OrderCreatedEvent, OrderUpdatedEvent } from './types';
+import { WebhookEventRequest } from './shared.types';
+import { insertWebhookEvent } from './db';
 
 // Generalized webhook handler for Lemon Squeezy
-export const webhookHandler = (req: Request | NextApiRequest, res: Response | NextApiResponse) => {
-    const event: WebhookEvent = req.body;
+export const webhookHandler = async (req: Request | NextApiRequest, res: Response | NextApiResponse) => {
+    const event: WebhookEventRequest = req.body;
 
     // TOOD.JMG: Verify webhook body.
     //
 
-    
+
     // Verify the webhook signature (optional, recommended)
     // const signature = req.headers['x-signature'] as string;
     // if (!verifySignature(event, signature)) {
@@ -17,15 +18,10 @@ export const webhookHandler = (req: Request | NextApiRequest, res: Response | Ne
     // }
 
     // Handle the webhook event
-    switch (event.type) {
-        // Add more cases for other event types as needed
-        default:
-            // TODO.JMG: Insert record into db for processing later 
-            //
-            console.log(`Unhandled event type: ${event.type}`);
-    }
-
+ 
     // Respond to the webhook
+    console.log(event);
+    await insertWebhookEvent({event_name: event.meta.event_name, event_type: event.type, payload: JSON.stringify(event)})
     res.status(200).send('Webhook received');
 };
 
