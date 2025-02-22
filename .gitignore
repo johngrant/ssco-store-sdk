@@ -41,3 +41,6 @@ jspm_packages/
 
 # Mac system files
 .DS_Store
+
+# Jest coverage folder
+coverage/
