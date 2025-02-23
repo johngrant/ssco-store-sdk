@@ -13,7 +13,7 @@ export const config = {
 };
 
 // Generalized webhook handler for Lemon Squeezy
-export const webhookHandler = async (req: NextRequest) => {
+export const webhookHandler = async (req: NextRequest): Promise<NextResponse> => {
   try {
     Logger.info("Executing webhookHandler().");
     // Use the custom middleware to capture the raw body
