@@ -2,8 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { webhookHandler } from "./webhook";
 import { WebhookEventCreate, WebhookEventRequest } from "./shared.types";
 import { insertWebhookEvent } from "./db";
-import { rawBodyMiddleware } from "./middleware";
 import { Logger } from "./Logger";
+import { getRawBody } from "./getRawBody";
 
 const webhookEventRequest: WebhookEventRequest = {
   meta: { event_name: "subscription_created" },
@@ -28,23 +28,21 @@ jest.mock("./Logger", () => ({
   }
 }));
 
-jest.mock("./middleware", () => ({
-  rawBodyMiddleware: jest.fn((req, res, next) => {
-    // Immediately call next to resolve the middleware
-    req.body = webhookEventRequest;
-    req.rawBody = JSON.stringify(webhookEventRequest);
-    next();
-  }),
-}));
 const isValidSignature = jest.fn().mockReturnValue(true);
 // 1. Mock SignatureVerifier class, returning an object that has an isValidSignature mock.
-jest.mock("./signatureVerifier", () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      isValidSignature
-    };
-  });
+jest.mock("./SignatureVerifier", () => {
+  return {
+    SignatureVerifier: jest.fn().mockImplementation(() => {
+      return {
+        isValidSignature
+      };
+    })
+  };
 });
+
+jest.mock("./getRawBody", () => ({
+  getRawBody: jest.fn()
+}));
 
 describe("webhookHandler", () => {
   let req: Partial<NextApiRequest>;
@@ -56,6 +54,7 @@ describe("webhookHandler", () => {
   beforeEach(() => {
     jsonMock = jest.fn();
     sendMock = jest.fn();
+    (getRawBody as jest.Mock).mockResolvedValue(JSON.stringify(webhookEventRequest));
     statusMock = jest.fn().mockReturnValue({
       json: jsonMock,
       send: sendMock,
@@ -75,11 +74,11 @@ describe("webhookHandler", () => {
 
   afterEach(() => {
     (insertWebhookEvent as jest.Mock).mockClear();
-    (rawBodyMiddleware as jest.Mock).mockClear();
     jsonMock.mockClear();
     sendMock.mockClear();
     statusMock.mockClear();
     isValidSignature.mockClear();
+    (getRawBody as jest.Mock).mockClear();
   });
 
   it("logs executing", async () => {
@@ -111,12 +110,12 @@ describe("webhookHandler", () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it("should execute rawBodyMiddleware", async () => {
+  it("should execute getRawBody", async () => {
     req.body = webhookEventRequest;
 
     await webhookHandler(req as NextApiRequest, res as NextApiResponse);
 
-    expect(rawBodyMiddleware).toHaveBeenCalled();
+    expect(getRawBody).toHaveBeenCalled();
   });
 
   it("should verify signature", async () => {
@@ -126,7 +125,7 @@ describe("webhookHandler", () => {
 
     await webhookHandler(req as NextApiRequest, res as NextApiResponse);
 
-    expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(req.body), "valid_signature");
+    expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(webhookEventRequest), "valid_signature");
     expect(res.status).toHaveBeenCalledWith(200);
   });
 });

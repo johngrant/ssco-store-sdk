@@ -15,8 +15,6 @@ export class SignatureVerifier {
     }
 }
 
-export default SignatureVerifier;
-
 // Usage example:
 // const verifier = new SignatureVerifier(); // Uses process.env.SIGNATURE_SECRET or 'default-secret'
 // const isValid = verifier.isValidSignature(requestBody, receivedSignature);

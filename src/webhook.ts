@@ -1,28 +1,27 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Request, Response } from "express";
 import { WebhookEventRequest } from "./shared.types";
 import { insertWebhookEvent } from "./db";
-import { CombinedRequest, RawBodyIncoming, rawBodyMiddleware } from "./middleware";
-import SignatureVerifier from "./SignatureVerifier";
+import { SignatureVerifier } from "./SignatureVerifier";
 import { Logger } from "./Logger";
+import { getRawBody } from "./getRawBody";
+
+// Middleware to prevent raw body processing by Next.js
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // Generalized webhook handler for Lemon Squeezy
 export const webhookHandler = async (
-  req: Request | NextApiRequest,
-  res: Response | NextApiResponse
+  req: NextApiRequest,
+  res: NextApiResponse
 ) => {
   Logger.info('Executing webhookHandler().');
   // Use the custom middleware to capture the raw body
-  await new Promise((resolve, reject) => {
-    rawBodyMiddleware(req as CombinedRequest, res, (err) => {
-      if (err) reject(err);
-      else resolve(null);
-    });
-  });
-
-  const rawBody = (req as RawBodyIncoming).rawBody || "";
-
   // Parse the raw body into an event
+  const rawBody = await getRawBody(req as NextApiRequest);
+
   let event: WebhookEventRequest;
   try {
     event = JSON.parse(rawBody) as WebhookEventRequest;
