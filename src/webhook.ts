@@ -13,20 +13,24 @@ export const config = {
 };
 
 // Generalized webhook handler for Lemon Squeezy
-export const webhookHandler = async (req: NextRequest): Promise<NextResponse> => {
+export const webhookHandler = async (
+  req: NextRequest
+): Promise<NextResponse> => {
   try {
     Logger.info("Executing webhookHandler().");
     // Use the custom middleware to capture the raw body
     // Parse the raw body into an event
     const rawBody = await getRawBody(req as NextRequest);
 
-    const event: WebhookEventRequest = JSON.parse(rawBody) as WebhookEventRequest;
+    const event: WebhookEventRequest = JSON.parse(
+      rawBody
+    ) as WebhookEventRequest;
 
     // Verify the signature
     const signature = req.headers.get("x-signature") as string;
     const signatureVerifier = new SignatureVerifier();
     if (!signatureVerifier.isValidSignature(rawBody, signature)) {
-      return NextResponse.json({ error: "Invalid signature", status: 400 });
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     await insertWebhookEvent({
@@ -34,11 +38,11 @@ export const webhookHandler = async (req: NextRequest): Promise<NextResponse> =>
       event_type: event.type,
       payload: JSON.stringify(event),
     });
-    return NextResponse.json({ message: "Webhook received", status: 200 });
+    return NextResponse.json({ message: "Webhook received" }, { status: 200 });
   } catch (error) {
     Logger.error(`Error: `);
     Logger.error(error as object);
-    return NextResponse.json({ error, status: 400 });
+    return NextResponse.json({ error }, { status: 400 });
   } finally {
     Logger.info("Executed webhookHandler().");
   }

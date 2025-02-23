@@ -24,8 +24,8 @@ jest.mock("./Logger", () => ({
     info: jest.fn(),
     error: jest.fn(),
     warn: jest.fn(),
-    log: jest.fn()
-  }
+    log: jest.fn(),
+  },
 }));
 
 const isValidSignature = jest.fn().mockReturnValue(true);
@@ -35,14 +35,14 @@ jest.mock("./SignatureVerifier", () => {
   return {
     SignatureVerifier: jest.fn().mockImplementation(() => {
       return {
-        isValidSignature
+        isValidSignature,
       };
-    })
+    }),
   };
 });
 
 jest.mock("./getRawBody", () => ({
-  getRawBody: jest.fn()
+  getRawBody: jest.fn(),
 }));
 
 jest.mock("next/server", () => {
@@ -58,7 +58,7 @@ jest.mock("next/server", () => {
 
 class MockNextRequest extends NextRequest {
   constructor(body: object, headers: HeadersInit = {}) {
-    super('http://localhost', { method: 'POST', headers });
+    super("http://localhost", { method: "POST", headers });
     this._body = body;
   }
 
@@ -82,7 +82,9 @@ describe("webhookHandler", () => {
   beforeEach(() => {
     jsonMock = jest.fn();
     sendMock = jest.fn();
-    (getRawBody as jest.Mock).mockResolvedValue(JSON.stringify(webhookEventRequest));
+    (getRawBody as jest.Mock).mockResolvedValue(
+      JSON.stringify(webhookEventRequest)
+    );
     statusMock = jest.fn().mockReturnValue({
       json: jsonMock,
       send: sendMock,
@@ -104,7 +106,9 @@ describe("webhookHandler", () => {
 
   it("logs executing", async () => {
     await webhookHandler(req as unknown as NextRequest);
-    expect(Logger.info).toHaveBeenCalledWith(expect.stringContaining("Executing webhookHandler()."));
+    expect(Logger.info).toHaveBeenCalledWith(
+      expect.stringContaining("Executing webhookHandler().")
+    );
   });
 
   it("logs executed", async () => {
@@ -115,7 +119,10 @@ describe("webhookHandler", () => {
   it("should send 200 response", async () => {
     await webhookHandler(req as unknown as NextRequest);
 
-    expect(NextResponse.json).toHaveBeenCalledWith({ message: "Webhook received", status: 200 });
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      { message: "Webhook received" },
+      { status: 200 }
+    );
   });
 
   it("should write webhook event data to postgres database", async () => {
@@ -133,7 +140,10 @@ describe("webhookHandler", () => {
   it("should verify signature", async () => {
     await webhookHandler(req as unknown as NextRequest);
 
-    expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(webhookEventRequest), "valid_signature");
+    expect(isValidSignature).toHaveBeenCalledWith(
+      JSON.stringify(webhookEventRequest),
+      "valid_signature"
+    );
   });
 
   it("should send 400 response if signature is not valid", async () => {
@@ -142,7 +152,14 @@ describe("webhookHandler", () => {
 
     await webhookHandler(req as unknown as NextRequest);
 
-    expect(NextResponse.json).toHaveBeenCalledWith({ error: "Invalid signature", status: 400 });
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      {
+        error: "Invalid signature",
+      },
+      {
+        status: 400,
+      }
+    );
     expect(insertWebhookEvent).not.toHaveBeenCalled();
   });
 });
