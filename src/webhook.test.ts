@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import { webhookHandler } from "./webhook";
 import { WebhookEventCreate, WebhookEventRequest } from "./shared.types";
 import { insertWebhookEvent } from "./db";
@@ -29,7 +29,8 @@ jest.mock("./Logger", () => ({
 }));
 
 const isValidSignature = jest.fn().mockReturnValue(true);
-// 1. Mock SignatureVerifier class, returning an object that has an isValidSignature mock.
+
+// Mock SignatureVerifier class, returning an object that has an isValidSignature mock.
 jest.mock("./SignatureVerifier", () => {
   return {
     SignatureVerifier: jest.fn().mockImplementation(() => {
@@ -44,9 +45,36 @@ jest.mock("./getRawBody", () => ({
   getRawBody: jest.fn()
 }));
 
+jest.mock("next/server", () => {
+  const originalModule = jest.requireActual("next/server");
+  return {
+    ...originalModule,
+    NextResponse: {
+      ...originalModule.NextResponse,
+      json: jest.fn(),
+    },
+  };
+});
+
+class MockNextRequest extends NextRequest {
+  constructor(body: object, headers: HeadersInit = {}) {
+    super('http://localhost', { method: 'POST', headers });
+    this._body = body;
+  }
+
+  private _body: object;
+
+  async json() {
+    return this._body;
+  }
+
+  async text() {
+    return JSON.stringify(this._body);
+  }
+}
+
 describe("webhookHandler", () => {
-  let req: Partial<NextApiRequest>;
-  let res: Partial<NextApiResponse>;
+  let req: MockNextRequest;
   let statusMock: jest.Mock;
   let jsonMock: jest.Mock;
   let sendMock: jest.Mock;
@@ -59,17 +87,9 @@ describe("webhookHandler", () => {
       json: jsonMock,
       send: sendMock,
     });
-    req = {
-      headers: {
-        "x-signature": "valid_signature",
-      },
-      body: {},
-    };
-    res = {
-      status: statusMock,
-      json: jsonMock,
-      send: sendMock,
-    };
+    req = new MockNextRequest(webhookEventRequest, {
+      "x-signature": "valid_signature",
+    });
   });
 
   afterEach(() => {
@@ -79,49 +99,39 @@ describe("webhookHandler", () => {
     statusMock.mockClear();
     isValidSignature.mockClear();
     (getRawBody as jest.Mock).mockClear();
+    (NextResponse.json as jest.Mock).mockClear();
   });
 
   it("logs executing", async () => {
-    req.body = webhookEventRequest;
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+    await webhookHandler(req as unknown as NextRequest);
     expect(Logger.info).toHaveBeenCalledWith(expect.stringContaining("Executing webhookHandler()."));
   });
 
   it("logs executed", async () => {
-    req.body = webhookEventRequest;
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+    await webhookHandler(req as unknown as NextRequest);
     expect(Logger.info).toHaveBeenCalledWith("Executed webhookHandler().");
   });
 
   it("should send 200 response", async () => {
-    req.body = webhookEventRequest;
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+    await webhookHandler(req as unknown as NextRequest);
 
-    expect(res.json).toHaveBeenCalledWith({"message": "Webhook received", "status": 200});
+    expect(NextResponse.json).toHaveBeenCalledWith({ message: "Webhook received", status: 200 });
   });
 
-  it("should write webhook event data to postgress database", async () => {
-    req.body = webhookEventRequest;
-
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+  it("should write webhook event data to postgres database", async () => {
+    await webhookHandler(req as unknown as NextRequest);
 
     expect(insertWebhookEvent).toHaveBeenCalledWith(webhookEventCreate);
   });
 
   it("should execute getRawBody", async () => {
-    req.body = webhookEventRequest;
-
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+    await webhookHandler(req as unknown as NextRequest);
 
     expect(getRawBody).toHaveBeenCalled();
   });
 
   it("should verify signature", async () => {
-    req.headers = {
-      "x-signature": "valid_signature",
-    };
-
-    await webhookHandler(req as NextApiRequest, res as NextApiResponse);
+    await webhookHandler(req as unknown as NextRequest);
 
     expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(webhookEventRequest), "valid_signature");
   });
