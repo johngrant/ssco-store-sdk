@@ -26,14 +26,14 @@ export const webhookHandler = async (
   try {
     event = JSON.parse(rawBody) as WebhookEventRequest;
   } catch {
-    return res.status(400).send("Invalid JSON");
+    return res.json({ error: "Invalid JSON", status: 400 });
   }
 
   // Verify the signature
   const signature = req.headers["x-signature"] as string;
   const signatureVerifier = new SignatureVerifier();
   if (!signatureVerifier.isValidSignature(rawBody, signature)) {
-    return res.status(400).send("Invalid signature");
+    res.json({ error: "Invalid signature", status: 400 });
   }
 
   await insertWebhookEvent({
@@ -41,6 +41,6 @@ export const webhookHandler = async (
     event_type: event.type,
     payload: JSON.stringify(event),
   });
-  res.status(200).send("Webhook received");
+  res.json({ message: "Webhook received", status: 200 });
   Logger.info('Executed webhookHandler().');
 };

@@ -97,8 +97,7 @@ describe("webhookHandler", () => {
     req.body = webhookEventRequest;
     await webhookHandler(req as NextApiRequest, res as NextApiResponse);
 
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith("Webhook received");
+    expect(res.json).toHaveBeenCalledWith({"message": "Webhook received", "status": 200});
   });
 
   it("should write webhook event data to postgress database", async () => {
@@ -107,7 +106,6 @@ describe("webhookHandler", () => {
     await webhookHandler(req as NextApiRequest, res as NextApiResponse);
 
     expect(insertWebhookEvent).toHaveBeenCalledWith(webhookEventCreate);
-    expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it("should execute getRawBody", async () => {
@@ -126,6 +124,5 @@ describe("webhookHandler", () => {
     await webhookHandler(req as NextApiRequest, res as NextApiResponse);
 
     expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(webhookEventRequest), "valid_signature");
-    expect(res.status).toHaveBeenCalledWith(200);
   });
 });
