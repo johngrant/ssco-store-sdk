@@ -1,6 +1,6 @@
 # Stockton Street Co Store SDK
 
-Welcome to the SSCO Store SDK! This SDK provides generalized client apis, webhook handlers, messaging, and services to be used in building integraitons with the Lemon Squeezy platform. 
+Welcome to the SSCO Store SDK! This SDK provides a webhook handler and related service to be used in building integrations with the Lemon Squeezy platform. 
 # 🍋✊🏻
 
 - **Author**: John Grant
@@ -27,7 +27,7 @@ Here are some open design questions that need to be addressed:
 > Evaluate options like MongoDB, PostgreSQL, and MySQL based on factors such as data consistency, scalability, and ease of use.
 
 3. **Do we implement message queuing and transport with service bus?** 
-> Lemon Squeezy docs suggest return 200 immediately from webhooks after storing the json request then use async processing on it later. This implies queuing and tranport layers.  
+> Lemon Squeezy docs suggest return 200 immediately from webhooks after storing the json request then use async processing on it later. This implies queuing and transport layers.  
 
 4. **What logging and monitoring tools should we implement?**
 
