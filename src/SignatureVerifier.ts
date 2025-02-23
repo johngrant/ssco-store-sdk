@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { Logger } from './Logger';
 
 export class SignatureVerifier {
     private secret: string;
@@ -8,10 +9,14 @@ export class SignatureVerifier {
     }
 
     isValidSignature(payload: string, signature: string): boolean {
+        Logger.info('Executing isValidSignature().');
         const hmac = crypto.createHmac('sha256', this.secret);
         hmac.update(payload, 'utf8');
         const digest = hmac.digest('hex');
-        return digest === signature;
+        Logger.info('Executed isValidSignature().');
+        const isValid = digest === signature;
+        Logger.info({ isValid });
+        return isValid;
     }
 }
 

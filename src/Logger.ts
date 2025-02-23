@@ -3,21 +3,37 @@ function getTimestamp(): string {
 }
 
 const Logger = {
-  log(message: string): void {
-    console.log(`[LOG] ${getTimestamp()} ${message}`);
+  log(message: string | object): void {
+    if (typeof message === 'object') {
+      console.log(`[LOG] ${getTimestamp()} ${JSON.stringify(message)}`);
+    } else {
+      console.log(`[LOG] ${getTimestamp()} ${message}`);
+    }
   },
 
-  info(message: string): void {
-    console.info(`[INFO] ${getTimestamp()} ${message}`);
+  info(message: string | object): void {
+    if (typeof message === 'object') {
+      console.info(`[INFO] ${getTimestamp()} ${JSON.stringify(message)}`);
+    } else {
+      console.info(`[INFO] ${getTimestamp()} ${message}`);
+    }
+  },
+  
+  warn(message: string | object): void {
+    if (typeof message === 'object') {
+      console.warn(`[WARN] ${getTimestamp()} ${JSON.stringify(message)}`);
+    } else {
+      console.warn(`[WARN] ${getTimestamp()} ${message}`);
+    }
   },
 
-  warn(message: string): void {
-    console.warn(`[WARN] ${getTimestamp()} ${message}`);
+  error(message: string | object): void {
+    if (typeof message === 'object') {
+      console.error(`[ERROR] ${getTimestamp()} ${JSON.stringify(message)}`);
+    } else {
+      console.error(`[ERROR] ${getTimestamp()} ${message}`);
+    }
   },
-
-  error(message: string): void {
-    console.error(`[ERROR] ${getTimestamp()} ${message}`);
-  }
 };
 
 export { Logger };
