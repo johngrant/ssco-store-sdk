@@ -32,7 +32,7 @@ export const webhookHandler = async (
   const signature = req.headers.get("x-signature") as string;
   const signatureVerifier = new SignatureVerifier();
   if (!signatureVerifier.isValidSignature(rawBody, signature)) {
-    NextResponse.json({ error: "Invalid signature", status: 400 });
+    return NextResponse.json({ error: "Invalid signature", status: 400 });
   }
 
   await insertWebhookEvent({

@@ -3,11 +3,11 @@ import { WebhookEventCreate } from "./shared.types";
 import { Logger } from "./Logger";
 
 const pool = new Pool({
-  user: "your_db_user",
-  host: "your_db_host",
-  database: "your_db_name",
-  password: "your_db_password",
-  port: 5432, // default PostgreSQL port
+  user: process.env.DB_USER || "default_user",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "default_db",
+  password: process.env.DB_PASSWORD || "default_password",
+  port: parseInt(process.env.DB_PORT || "5432", 10), // default PostgreSQL port
 });
 
 const db = {

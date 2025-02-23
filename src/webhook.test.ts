@@ -135,4 +135,14 @@ describe("webhookHandler", () => {
 
     expect(isValidSignature).toHaveBeenCalledWith(JSON.stringify(webhookEventRequest), "valid_signature");
   });
+
+  it("should send 400 response if signature is not valid", async () => {
+    isValidSignature.mockReset();
+    isValidSignature.mockReturnValueOnce(false);
+
+    await webhookHandler(req as unknown as NextRequest);
+
+    expect(NextResponse.json).toHaveBeenCalledWith({ error: "Invalid signature", status: 400 });
+    expect(insertWebhookEvent).not.toHaveBeenCalled();
+  });
 });
