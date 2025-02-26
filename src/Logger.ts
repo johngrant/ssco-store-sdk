@@ -2,37 +2,26 @@ function getTimestamp(): string {
   return new Date().toISOString();
 }
 
+function genericLog(level: "log" | "info" | "warn" | "error", message: string | object): void {
+  const formattedMessage = typeof message === "object" ? JSON.stringify(message, null, 2) : message;
+  console[level](`[${level.toUpperCase()}] ${getTimestamp()} ${formattedMessage}`);
+}
+
 const Logger = {
   log(message: string | object): void {
-    if (typeof message === 'object') {
-      console.log(`[LOG] ${getTimestamp()} ${JSON.stringify(message)}`);
-    } else {
-      console.log(`[LOG] ${getTimestamp()} ${message}`);
-    }
+    genericLog("log", message);
   },
 
   info(message: string | object): void {
-    if (typeof message === 'object') {
-      console.info(`[INFO] ${getTimestamp()} ${JSON.stringify(message)}`);
-    } else {
-      console.info(`[INFO] ${getTimestamp()} ${message}`);
-    }
+    genericLog("info", message);
   },
-  
+
   warn(message: string | object): void {
-    if (typeof message === 'object') {
-      console.warn(`[WARN] ${getTimestamp()} ${JSON.stringify(message)}`);
-    } else {
-      console.warn(`[WARN] ${getTimestamp()} ${message}`);
-    }
+    genericLog("warn", message);
   },
 
   error(message: string | object): void {
-    if (typeof message === 'object') {
-      console.error(`[ERROR] ${getTimestamp()} ${JSON.stringify(message)}`);
-    } else {
-      console.error(`[ERROR] ${getTimestamp()} ${message}`);
-    }
+    genericLog("error", message);
   },
 };
 

@@ -1,23 +1,28 @@
-import * as crypto from 'crypto';
-import { Logger } from './Logger';
+import * as crypto from "crypto";
+import { Logger } from "./Logger";
 
 export class SignatureVerifier {
-    private secret: string;
+  private secret: string;
 
-    constructor(secret: string = process.env.SIGNATURE_SECRET || 'default-secret') {
-        this.secret = secret;
-    }
+  constructor(
+    secret: string = process.env.SSCO_SIGNATURE_SECRET || "default-secret"
+  ) {
+    this.secret = secret;
+  }
 
-    isValidSignature(payload: string, signature: string): boolean {
-        Logger.info('Executing isValidSignature().');
-        const hmac = crypto.createHmac('sha256', this.secret);
-        hmac.update(payload, 'utf8');
-        const digest = hmac.digest('hex');
-        Logger.info('Executed isValidSignature().');
-        const isValid = digest === signature;
-        Logger.info({ isValid });
-        return isValid;
-    }
+  isValidSignature(payload: string, signature: string): boolean {
+    Logger.info("Executing isValidSignature().");
+    Logger.info({ secret: this.secret });
+    Logger.info({ signature });
+    Logger.info({ payload });
+    const hmac = crypto.createHmac("sha256", this.secret);
+    hmac.update(payload, "utf8");
+    const digest = hmac.digest("hex");
+    Logger.info("Executed isValidSignature().");
+    const isValid = digest === signature;
+    Logger.info({ isValid });
+    return isValid;
+  }
 }
 
 // Usage example:

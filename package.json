@@ -1,10 +1,11 @@
 {
   "name": "ssco-store-sdk",
-  "version": "1.0.18",
+  "version": "1.0.26",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "pack": "npm pack",
     "prepublishOnly": "npm run build",
     "test": "jest",
     "lint": "eslint 'src/**/*.{js,ts}' 'tests/**/*.test.{js,ts}'",

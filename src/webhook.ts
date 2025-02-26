@@ -35,7 +35,7 @@ export const webhookHandler = async (
 
     await insertWebhookEvent({
       event_name: event.meta.event_name,
-      event_type: event.type,
+      event_type: event.data.type,
       payload: JSON.stringify(event),
     });
     return NextResponse.json({ message: "Webhook received" }, { status: 200 });

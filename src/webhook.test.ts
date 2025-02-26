@@ -7,7 +7,9 @@ import { getRawBody } from "./getRawBody";
 
 const webhookEventRequest: WebhookEventRequest = {
   meta: { event_name: "subscription_created" },
-  type: "subscriptions",
+  data: {
+    type: "subscriptions",
+  },
 };
 const webhookEventCreate: WebhookEventCreate = {
   event_name: "subscription_created",
